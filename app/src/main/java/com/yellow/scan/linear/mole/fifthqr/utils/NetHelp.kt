@@ -34,7 +34,7 @@ object NetHelp {
                 Settings.Secure.ANDROID_ID
             ),
             //os
-            "skylark" to "checksum",
+            "skylark" to "reign",
             //app_version
             "vicky" to (getAppVersion(context) ?: ""),
         )

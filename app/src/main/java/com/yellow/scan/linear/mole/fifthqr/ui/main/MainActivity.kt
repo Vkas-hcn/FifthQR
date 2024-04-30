@@ -36,9 +36,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
     R.layout.activity_main, BaseViewModel::class.java
 ) {
     private lateinit var cameraPermissionManager: CameraPermissionManager
-
-        lateinit var fragmentScan: ScanFragment
-//    lateinit var fragmentScan: CaptureFragment
+    lateinit var fragmentScan: ScanFragment
     lateinit var fragmentCrete: CreateFragment
     lateinit var fragmentMore: MoreFragment
     lateinit var imagePicker: ImagePicker
@@ -80,7 +78,9 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
         fragmentMore = MoreFragment()
         supportFragmentManager.beginTransaction().replace(R.id.frag_main, fragmentScan).commit()
         binding.imgScan.setOnClickListener {
-            if(binding.haveLoad==true){return@setOnClickListener}
+            if (binding.haveLoad == true) {
+                return@setOnClickListener
+            }
             cameraPermissionManager.checkCameraPermission(this)
             loadFragment(fragmentScan)
             binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
@@ -100,7 +100,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
 
     private fun loadFragment(fragment: Fragment) {
         lifecycleScope.launch {
-            if(fragment is ScanFragment){
+            if (fragment is ScanFragment) {
                 binding.haveLoad = true
                 delay(1000)
                 binding.haveLoad = false
@@ -170,6 +170,7 @@ class ImagePicker(private val activity: AppCompatActivity) {
 
     // 启动图片选择器
     fun pickImage(callback: (Uri?) -> Unit) {
+        App.whetherBackgroundSmild = false
         imagePickerCallback = callback
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         activity.startActivityForResult(intent, REQUEST_IMAGE_PICKER)
