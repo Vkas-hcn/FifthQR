@@ -17,7 +17,6 @@ import com.yellow.scan.linear.mole.fifthqr.model.BaseViewModel
 import com.yellow.scan.linear.mole.fifthqr.ui.create.CreateFragment
 import com.yellow.scan.linear.mole.fifthqr.ui.more.MoreFragment
 import com.yellow.scan.linear.mole.fifthqr.ui.result.ActivityResult
-import com.yellow.scan.linear.mole.fifthqr.ui.scan.ScanFragment
 import com.yellow.scan.linear.mole.fifthqr.utils.CameraPermissionManager
 import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CodeUtils
 import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CodeUtils.analyzeBitmap
@@ -25,13 +24,21 @@ import android.content.Context
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
+import com.yellow.scan.linear.mole.fifthqr.base.App
+import com.yellow.scan.linear.mole.fifthqr.ui.scan.ScanFragment
 import com.yellow.scan.linear.mole.fifthqr.utils.AppData
+import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CaptureFragment
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
     R.layout.activity_main, BaseViewModel::class.java
 ) {
     private lateinit var cameraPermissionManager: CameraPermissionManager
-    lateinit var fragmentScan: ScanFragment
+
+        lateinit var fragmentScan: ScanFragment
+//    lateinit var fragmentScan: CaptureFragment
     lateinit var fragmentCrete: CreateFragment
     lateinit var fragmentMore: MoreFragment
     lateinit var imagePicker: ImagePicker
@@ -73,6 +80,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
         fragmentMore = MoreFragment()
         supportFragmentManager.beginTransaction().replace(R.id.frag_main, fragmentScan).commit()
         binding.atvScan.setOnClickListener {
+            if(binding.haveLoad==true){return@setOnClickListener}
             cameraPermissionManager.checkCameraPermission(this)
             loadFragment(fragmentScan)
             binding.atvScan.setTextColor(resources.getColor(R.color.setele_color))
@@ -91,10 +99,17 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
     }
 
     private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().replace(R.id.frag_main, fragment).commit()
+        lifecycleScope.launch {
+            if(fragment is ScanFragment){
+                binding.haveLoad = true
+                delay(1000)
+                binding.haveLoad = false
+            }
+            supportFragmentManager.beginTransaction().replace(R.id.frag_main, fragment).commitNow()
+        }
     }
 
-    fun toCreteFragment() {
+    private fun toCreteFragment() {
         loadFragment(fragmentCrete)
         binding.atvScan.setTextColor(resources.getColor(R.color.dis_setele_color))
         binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
@@ -133,9 +148,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         cameraPermissionManager.handleCameraPermissionResult(requestCode, grantResults)
@@ -164,6 +177,7 @@ class ImagePicker(private val activity: AppCompatActivity) {
 
     fun onActivityResult(activity: MainActivity, requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_IMAGE_PICKER && resultCode == Activity.RESULT_OK) {
+            App.whetherBackgroundSmild = false
             val selectedImageUri = data?.data
             imagePickerCallback?.invoke(selectedImageUri)
         }
@@ -177,8 +191,7 @@ class ImagePicker(private val activity: AppCompatActivity) {
                 override fun onAnalyzeSuccess(mBitmap: Bitmap?, result: String?) {
                     if (result.isNullOrEmpty()) {
                         Toast.makeText(
-                            activity, "Identification failed, please try again",
-                            Toast.LENGTH_SHORT
+                            activity, "Identification failed, please try again", Toast.LENGTH_SHORT
                         ).show()
                         return
                     }
@@ -187,9 +200,7 @@ class ImagePicker(private val activity: AppCompatActivity) {
 
                 override fun onAnalyzeFailed() {
                     Toast.makeText(
-                        activity,
-                        "Identification failed, please try again",
-                        Toast.LENGTH_LONG
+                        activity, "Identification failed, please try again", Toast.LENGTH_LONG
                     ).show()
                 }
             })

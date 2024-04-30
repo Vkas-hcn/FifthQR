@@ -19,25 +19,19 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.yellow.scan.linear.mole.fifthqr.R
 import com.yellow.scan.linear.mole.fifthqr.databinding.FragmentLayoutScanBinding
 import com.yellow.scan.linear.mole.fifthqr.ui.main.MainActivity
-import com.yellow.scan.linear.mole.fifthqr.ui.result.ActivityResult
 import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CaptureFragment
 import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CodeUtils
 
 
 class ScanFragment : Fragment() {
     private lateinit var binding: FragmentLayoutScanBinding
-
+    private var captureFragment: CaptureFragment? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,11 +43,21 @@ class ScanFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        clickFUnction()
+        clickFunction()
         setQrScan()
     }
 
-    private fun clickFUnction() {
+    override fun onResume() {
+        super.onResume()
+        startCameraPreview()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        CodeUtils.isLightEnable(false)
+        updateFlashlightIcon(false)
+    }
+    private fun clickFunction() {
         binding.imgImage.setOnClickListener {
             (activity as MainActivity).imagePicker.pickImage { selectedImageUri ->
                 selectedImageUri?.let {
@@ -68,6 +72,7 @@ class ScanFragment : Fragment() {
             }
         }
     }
+
     private fun updateFlashlightIcon(isFlashlightOn: Boolean) {
         if (isFlashlightOn) {
             binding.imgFlash.setImageResource(R.drawable.ic_flashlight)
@@ -75,6 +80,7 @@ class ScanFragment : Fragment() {
             binding.imgFlash.setImageResource(R.drawable.ic_flashlight_dis)
         }
     }
+
     private fun setQrScan() {
         val analyzeCallback: CodeUtils.AnalyzeCallback = object : CodeUtils.AnalyzeCallback {
             override fun onAnalyzeSuccess(mBitmap: Bitmap?, result: String?) {
@@ -95,12 +101,25 @@ class ScanFragment : Fragment() {
                 ).show()
             }
         }
-        val captureFragment = CaptureFragment()
-        CodeUtils.setFragmentArgs(captureFragment, R.layout.auto_qr)
-        captureFragment.analyzeCallback = analyzeCallback
+        captureFragment = CaptureFragment()
+        CodeUtils.setFragmentArgs(captureFragment!!, R.layout.auto_qr)
+        captureFragment!!.analyzeCallback = analyzeCallback
         activity?.supportFragmentManager?.beginTransaction()
-            ?.replace(R.id.fl_my_container, captureFragment)?.commit()
+            ?.replace(R.id.fl_my_container, captureFragment!!)?.commit()
     }
 
-
+    private fun startCameraPreview() {
+        captureFragment?.let {
+            activity?.supportFragmentManager?.beginTransaction()?.remove(it)?.commitAllowingStateLoss()
+            captureFragment = null
+        }
+        setQrScan()
+    }
+    fun stopCameraPreview(){
+        captureFragment?.let {
+            activity?.supportFragmentManager?.beginTransaction()?.remove(it)?.commitAllowingStateLoss()
+            captureFragment = null
+        }
+    }
 }
+

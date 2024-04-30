@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -38,7 +39,7 @@ class CameraPermissionManager(private val context: Context) {
     }
 
     private fun showPermissionRationaleDialog(activity: Activity) {
-        AlertDialog.Builder(activity)
+       val dialog =  AlertDialog.Builder(activity)
             .setTitle("Camera Permission Required")
             .setMessage("This app requires camera permission to function properly.")
             .setPositiveButton("Grant") { dialog: DialogInterface, _: Int ->
@@ -49,6 +50,8 @@ class CameraPermissionManager(private val context: Context) {
                 dialog.dismiss()
             }
             .show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.BLACK)
+        dialog.getButton(DialogInterface.BUTTON_NEGATIVE)?.setTextColor(Color.BLACK)
     }
 
     private fun requestCameraPermission(activity: Activity) {

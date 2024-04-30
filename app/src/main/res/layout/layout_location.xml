@@ -63,7 +63,7 @@
                 android:gravity="start"
                 android:padding="12dp"
                 android:inputType="numberDecimal"
-                android:text="Longitude："
+                android:text="Longitude:"
                 android:textColor="#FF333333"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -77,7 +77,7 @@
                 android:inputType="numberDecimal"
                 android:gravity="start"
                 android:padding="12dp"
-                android:text="Latitude："
+                android:text="Latitude:"
                 android:textColor="#FF333333"
                 android:textSize="14sp"
                 android:textStyle="bold" />

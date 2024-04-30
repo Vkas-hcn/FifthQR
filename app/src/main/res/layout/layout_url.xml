@@ -33,7 +33,7 @@
                 android:layout_height="match_parent"
                 android:background="@null"
                 android:gravity="start"
-                android:text="Https：//"
+                android:text="Https://"
                 android:textColor="#333333"
                 android:textSize="14sp" />
         </LinearLayout>

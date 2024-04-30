@@ -4,8 +4,8 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="android:statusBarColor">#FEB624</item>
-        <item name="colorPrimary">@color/white</item>
-         <item name="colorAccent">@color/white</item>
+        <item name="colorPrimary">#FEB624</item>
+         <item name="colorAccent">#FEB624</item>
     </style>
 
     <style name="Theme.FifthQR" parent="Base.Theme.FifthQR" />
