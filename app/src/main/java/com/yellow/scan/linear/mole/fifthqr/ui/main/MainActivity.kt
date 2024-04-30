@@ -79,21 +79,21 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
         fragmentCrete = CreateFragment()
         fragmentMore = MoreFragment()
         supportFragmentManager.beginTransaction().replace(R.id.frag_main, fragmentScan).commit()
-        binding.atvScan.setOnClickListener {
+        binding.imgScan.setOnClickListener {
             if(binding.haveLoad==true){return@setOnClickListener}
             cameraPermissionManager.checkCameraPermission(this)
             loadFragment(fragmentScan)
-            binding.atvScan.setTextColor(resources.getColor(R.color.setele_color))
             binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
+            binding.atvCreate.setTextColor(resources.getColor(R.color.dis_setele_color))
         }
-        binding.imgCrete.setOnClickListener {
+        binding.atvCreate.setOnClickListener {
             loadFragment(fragmentCrete)
-            binding.atvScan.setTextColor(resources.getColor(R.color.dis_setele_color))
+            binding.atvCreate.setTextColor(resources.getColor(R.color.setele_color))
             binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
         }
         binding.atvMore.setOnClickListener {
             loadFragment(fragmentMore)
-            binding.atvScan.setTextColor(resources.getColor(R.color.dis_setele_color))
+            binding.atvCreate.setTextColor(resources.getColor(R.color.dis_setele_color))
             binding.atvMore.setTextColor(resources.getColor(R.color.setele_color))
         }
     }
@@ -111,7 +111,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
 
     private fun toCreteFragment() {
         loadFragment(fragmentCrete)
-        binding.atvScan.setTextColor(resources.getColor(R.color.dis_setele_color))
+        binding.atvCreate.setTextColor(resources.getColor(R.color.setele_color))
         binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
     }
 

@@ -45,14 +45,14 @@
                 app:layout_constraintBottom_toBottomOf="parent">
 
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/atv_scan"
+                    android:id="@+id/atv_create"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:drawableTop="@drawable/ic_main_scan_1"
                     android:gravity="center"
-                    android:text="Scan"
-                    android:textColor="#FFFDB623"
+                    android:text="Create"
+                    android:textColor="#D9D9D9"
                     android:textSize="12sp" />
 
                 <View
@@ -75,7 +75,7 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/img_crete"
+                android:id="@+id/img_scan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="-45dp"
