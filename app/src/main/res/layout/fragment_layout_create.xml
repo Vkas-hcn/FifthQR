@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="creteType"
+            type="Integer"
+            android:value="1" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/bg_crete"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/img_back"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="23dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_back"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Crete"
+            android:textColor="#FFFFFFFF"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/img_back"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/img_back" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="113dp"
+            android:background="@drawable/bg_10"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/img_back"
+            tools:layout_editor_absoluteX="20dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_crete"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:orientation="horizontal"
+                tools:listitem="@layout/item_text" />
+
+            <include
+                android:id="@+id/include_1"
+                layout="@layout/layout_text"
+                creteType ="@{creteType}"/>
+
+            <include
+                android:id="@+id/include_2"
+                layout="@layout/layout_url"
+                creteType ="@{creteType}"/>
+
+            <include
+                android:id="@+id/include_3"
+                layout="@layout/layout_location"
+                creteType ="@{creteType}" />
+
+            <include
+                android:id="@+id/include_4"
+                layout="@layout/layout_email"
+                creteType ="@{creteType}" />
+
+            <include
+                android:id="@+id/include_5"
+                layout="@layout/layout_wifi"
+                creteType ="@{creteType}" />
+
+            <include
+                android:id="@+id/include_6"
+                layout="@layout/layout_card"
+                creteType ="@{creteType}" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="36dp"
+            android:background="@drawable/bg_qr"
+            android:gravity="center"
+            android:paddingVertical="12dp"
+            android:text="Create"
+            android:textColor="#FF2E2E2E"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
