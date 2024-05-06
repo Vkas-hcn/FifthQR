@@ -9,7 +9,7 @@ object AppData {
     var pp_url = "https://www.baidu.com"
     var bitmapQr: Bitmap? = null
     var qr_crete_data = """
-        Text,Url,Location,Email,Wi-Fi,Card
+        Text,Url,Location,Email,Wi-Fi
     """.trimIndent()
     private val sharedPreferences by lazy {
         App.getAppContext().getSharedPreferences(

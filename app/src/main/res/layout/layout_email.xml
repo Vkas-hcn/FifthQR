@@ -36,7 +36,6 @@
                 android:gravity="start"
                 android:padding="12dp"
                 android:text="Email:"
-                android:inputType="textEmailAddress"
                 android:textColor="#FF333333"
                 android:textSize="14sp"
                 android:textStyle="bold" />

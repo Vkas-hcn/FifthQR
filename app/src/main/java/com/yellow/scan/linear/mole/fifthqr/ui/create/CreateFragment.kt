@@ -110,16 +110,6 @@ class CreateFragment : Fragment() {
                 }
             }
 
-            6 -> {
-                binding.include6.apply {
-                    qrText =
-                        "${etContentFirst.text}\n${etContentLast.text}\n${etContentMobile.text}\n${etContentEmail.text}\n" +
-                                "${etContentCompany.text}\n" +
-                                "${etContentAddress.text}"
-
-                }
-            }
-
             else -> {
                 qrText = ""
             }
@@ -163,17 +153,6 @@ class CreateFragment : Fragment() {
                     return etContentNetworkName.text.toString()
                         .isNotEmpty() && etContentPassword.text.toString()
                         .isNotEmpty()
-                }
-            }
-
-            6 -> {
-                binding.include6.apply {
-                    return etContentFirst.text.toString()
-                        .isNotEmpty() && etContentLast.text.toString()
-                        .isNotEmpty() && etContentMobile.text.toString()
-                        .isNotEmpty() && etContentEmail.text.toString()
-                        .isNotEmpty() && etContentCompany.text.toString()
-                        .isNotEmpty() && etContentAddress.text.toString().isNotEmpty()
                 }
             }
 

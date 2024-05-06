@@ -96,10 +96,6 @@
                 layout="@layout/layout_wifi"
                 creteType ="@{creteType}" />
 
-            <include
-                android:id="@+id/include_6"
-                layout="@layout/layout_card"
-                creteType ="@{creteType}" />
         </LinearLayout>
 
         <TextView
