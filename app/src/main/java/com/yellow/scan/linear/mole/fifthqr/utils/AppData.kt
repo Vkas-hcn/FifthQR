@@ -384,11 +384,21 @@ object AppData {
 
 
     val local_qr_ad_data = """
-        {
+          {
             "op": [
                 {
                     "we_scan": "c",
                     "id_scan": "ca-app-pub-3940256099942544/9257395921",
+                    "name_scan": "op",
+                    "type_scan": "Open"
+                },{
+                    "we_scan": "a",
+                    "id_scan": "ca-app-pub-3940256099942544/9257395921x",
+                    "name_scan": "op",
+                    "type_scan": "Open"
+                },{
+                    "we_scan": "b",
+                    "id_scan": "ca-app-pub-3940256099942544/9257395921x",
                     "name_scan": "op",
                     "type_scan": "Open"
                 }
@@ -418,13 +428,13 @@ object AppData {
                 }
             ],
             "clickNum": 2,
-            "showNum": 50
+            "showNum": 20
         }
     """.trimIndent()
 
     val flowBeanData = """
 {
-    "pt": "2"
+    "pt": "00"
 }
     """.trimIndent()
     fun getAdJson(): QrAdBean {

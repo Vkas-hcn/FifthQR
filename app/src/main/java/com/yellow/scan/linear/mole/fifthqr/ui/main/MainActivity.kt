@@ -106,7 +106,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
                 if (!cameraPermissionManager.checkCameraPermission(this@MainActivity)) {
                     return@launch
                 }
-                if (AppData.isThresholdReached() && QrAdLoad.resultOf(AppData.QR_BACK_MAIN) == "") {
+                if (QrAdLoad.resultOf(AppData.QR_BACK_MAIN) == "") {
                     binding.haveLoad = true
                     binding.tvLoading.text = "Loading..."
                     delay(1000)
@@ -196,25 +196,15 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
 
 
     private fun startAdLoad(adType: String, nextFun: (data: Any) -> Unit, timeOutFun: () -> Unit) {
-        if (AppData.isThresholdReached() && QrAdLoad.resultOf(adType) == "") {
-            timeOutFun()
-            return
-        }
         loadJob?.cancel()
         loadJob = null
         loadJob = lifecycleScope.launch(Dispatchers.Main) {
-
             try {
                 withTimeout(5000L) {
-
-                    binding.haveLoad = true
-                    delay(1000)
-
                     while (isActive) {
                         QrAdLoad.resultOf(adType)?.let { res ->
                             loadJob?.cancel()
                             loadJob = null
-                            binding.haveLoad = false
                             nextFun(res)
                         }
                         delay(500L)
@@ -223,7 +213,6 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
             } catch (e: TimeoutCancellationException) {
                 loadJob?.cancel()
                 loadJob = null
-                binding.haveLoad = false
                 timeOutFun()
             }
         }

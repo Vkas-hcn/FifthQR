@@ -136,22 +136,31 @@ object QrAdLoad {
                 if (cacheTime > 0L
                     && ((System.currentTimeMillis() - cacheTime) > (1000L * 50L * 60L))
                 ) {
-                    printLog("cache is expired")
-                    Log.e(TAG, "load: clearCache")
-                    clearCache()
+                    if (where != AppData.QR_OPEN) {
+                        printLog("${where}-cache is expired")
+                        clearCache()
+                    } else if (((System.currentTimeMillis() - cacheTime) > (1000L * 60L * 60L * 4L))) {
+                        printLog("${where}-cache is expired")
+                        clearCache()
+                    } else {
+                        printLog("${where}-Existing cache")
+                        return
+                    }
                 } else {
-                    printLog("Existing cache")
+                    printLog("${where}-Existing cache")
                     return
                 }
             }
+
+
             if ((cache == null || cache == "") && AppData.isThresholdReached()) {
                 printLog("The ad reaches the go-live")
-//                SmileNetHelp.postPotNet(context, "oom15", "oo", AppData.overrunType())
                 res = ""
                 return
             }
 
             if ((where == AppData.QR_BACK_MAIN || where == AppData.QR_CLICK_CREATE || where == AppData.QR_CLICK_SCAN) && !AppData.showAdBlacklist()) {
+                printLog("Blacklist blocking")
                 res = ""
                 return
             }
@@ -462,15 +471,36 @@ object QrAdLoad {
                 }
 
                 is InterstitialAd -> {
-
-                    if (!AppData.showAdBlacklist()) {
-                        callback.invoke()
-                        return
-                    }
                     context.lifecycleScope.launch(Dispatchers.Main) {
-                        res.fullScreenContentCallback = GoogleFullScreenCallback(where, callback)
-                        res.show(context)
+                        if (AppData.isThresholdReached() && res == "") {
+                            callback.invoke()
+                            return@launch
+                        }
+                        if (!AppData.showAdBlacklist()) {
+                            callback.invoke()
+                            return@launch
+                        }
+                        if (context is MainActivity) {
+                            context.binding.apply {
+                                haveLoad = true
+                                delay(1000)
+                                haveLoad = false
+                            }
+                        }
+                        if (context is ActivityResult) {
+                            context.binding.apply {
+                                haveLoad = true
+                                delay(1000)
+                                haveLoad = false
+                            }
+                        }
+                        context.lifecycleScope.launch(Dispatchers.Main) {
+                            res.fullScreenContentCallback =
+                                GoogleFullScreenCallback(where, callback)
+                            res.show(context)
+                        }
                     }
+
                 }
 
                 else -> callback()

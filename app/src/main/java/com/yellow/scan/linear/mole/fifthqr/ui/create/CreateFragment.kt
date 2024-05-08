@@ -43,6 +43,7 @@ class CreateFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setEditListener()
         QrAdLoad.loadOf(AppData.QR_BACK_MAIN)
+        QrAdLoad.loadOf(AppData.QR_CLICK_CREATE)
         NetHelp.postPotNet(App.getAppContext(), "scan2")
         adapter = CreteListAdapter()
         binding.rvCrete.adapter = adapter

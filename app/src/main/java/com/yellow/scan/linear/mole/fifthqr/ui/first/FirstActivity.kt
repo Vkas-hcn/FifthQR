@@ -153,6 +153,7 @@ class FirstActivity : BaseActivity<ActivityFirstBinding, BaseViewModel>(
                 where = AppData.QR_OPEN,
                 context = this,
                 res = it,
+                preload = true,
                 onShowCompleted = {
                     lifecycleScope.launch(Dispatchers.Main) {
                         jumpToMain.postValue(true)
@@ -181,7 +182,7 @@ class FirstActivity : BaseActivity<ActivityFirstBinding, BaseViewModel>(
         val debugSettings =
             ConsentDebugSettings.Builder(this)
                 .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
-                .addTestDeviceHashedId("76A730E9AE68BD60E99DF7B83D65C4B4")
+                .addTestDeviceHashedId("437866A57B0FAD333A37E294AF07BB1D")
                 .build()
         val params = ConsentRequestParameters
             .Builder()

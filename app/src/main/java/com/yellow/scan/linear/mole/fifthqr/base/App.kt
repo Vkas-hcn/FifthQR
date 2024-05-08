@@ -15,7 +15,9 @@ import com.adjust.sdk.AdjustAttribution
 import com.adjust.sdk.AdjustConfig
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
+import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import com.yellow.scan.linear.mole.fifthqr.base.QrAdLoad.TAG
 import com.yellow.scan.linear.mole.fifthqr.ui.first.FirstActivity
 import com.yellow.scan.linear.mole.fifthqr.utils.AppData
 import com.yellow.scan.linear.mole.fifthqr.utils.NetHelp
@@ -59,24 +61,38 @@ class App : Application(), LifecycleObserver {
     private fun setActivityLifecycleSmart(application: Application) {
         application.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-                top_activity_fif = activity
-
+                if (activity !is AdActivity) {
+                    top_activity_fif = activity
+                } else {
+                    ad_activity_fif = activity
+                }
             }
 
             override fun onActivityStarted(activity: Activity) {
-                top_activity_fif = activity
-                top_activity_name = activity.javaClass.simpleName
-
+                if (activity !is AdActivity) {
+                    top_activity_fif = activity
+                    top_activity_name = activity.javaClass.simpleName
+                } else {
+                    ad_activity_fif = activity
+                }
                 flag++
                 isBackDataSmile = false
             }
 
             override fun onActivityResumed(activity: Activity) {
-                top_activity_fif = activity
+                Adjust.onResume()
+                if (activity !is AdActivity) {
+                    top_activity_fif = activity
+                }
             }
 
             override fun onActivityPaused(activity: Activity) {
-                top_activity_fif = activity
+                Adjust.onPause()
+                if (activity is AdActivity) {
+                    ad_activity_fif = activity
+                } else {
+                    top_activity_fif = activity
+                }
             }
 
             override fun onActivityStopped(activity: Activity) {
@@ -117,7 +133,9 @@ class App : Application(), LifecycleObserver {
             whetherBackgroundSmild = true
             ad_activity_fif?.finish()
             QrAdLoad.setShowingFullScreen(false)
+            Log.d(TAG, "appOnStop: 1", )
             if (top_activity_fif is FirstActivity) {
+                Log.d(TAG, "appOnStop: 2", )
                 top_activity_fif?.finish()
             }
         }
