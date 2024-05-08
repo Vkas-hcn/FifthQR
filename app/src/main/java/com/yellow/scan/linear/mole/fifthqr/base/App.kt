@@ -16,7 +16,11 @@ import com.adjust.sdk.AdjustConfig
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
 import com.google.android.gms.ads.AdActivity
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import com.google.firebase.FirebaseApp
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
 import com.yellow.scan.linear.mole.fifthqr.base.QrAdLoad.TAG
 import com.yellow.scan.linear.mole.fifthqr.ui.first.FirstActivity
 import com.yellow.scan.linear.mole.fifthqr.utils.AppData
@@ -146,6 +150,9 @@ class App : Application(), LifecycleObserver {
         instance = this
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         setActivityLifecycleSmart(this)
+        MobileAds.initialize(this) {}
+        Firebase.initialize(this)
+        FirebaseApp.initializeApp(this)
         val data = AppData.uuid_fif
         if (data.isEmpty()) {
             AppData.uuid_fif = UUID.randomUUID().toString()
