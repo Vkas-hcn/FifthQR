@@ -5,10 +5,17 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.adjust.sdk.Adjust
+import com.adjust.sdk.AdjustAttribution
+import com.adjust.sdk.AdjustConfig
+import com.android.installreferrer.api.InstallReferrerClient
+import com.android.installreferrer.api.InstallReferrerStateListener
+import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.yellow.scan.linear.mole.fifthqr.ui.first.FirstActivity
 import com.yellow.scan.linear.mole.fifthqr.utils.AppData
 import com.yellow.scan.linear.mole.fifthqr.utils.NetHelp
@@ -109,6 +116,7 @@ class App : Application(), LifecycleObserver {
             delay(3000L)
             whetherBackgroundSmild = true
             ad_activity_fif?.finish()
+            QrAdLoad.setShowingFullScreen(false)
             if (top_activity_fif is FirstActivity) {
                 top_activity_fif?.finish()
             }
@@ -124,16 +132,83 @@ class App : Application(), LifecycleObserver {
         if (data.isEmpty()) {
             AppData.uuid_fif = UUID.randomUUID().toString()
         }
+        initAdJust(this)
+        getGid(this)
         GlobalScope.launch(Dispatchers.IO) {
             NetHelp.getBlackData(this@App)
+            getReferrerData(this@App)
         }
     }
-//    fun getGid(context: Context) {
-//        GlobalScope.launch(Dispatchers.IO) {
-//            runCatching {
-//                AppData.gidData = AdvertisingIdClient.getAdvertisingIdInfo(context).id ?: ""
-//            }
-//        }
-//    }
 
+    private fun initAdJust(application: Application) {
+        val sessionId = "customer_user_id"
+        val userId = AppData.uuid_fif
+        Adjust.addSessionCallbackParameter(sessionId, userId)
+        val appToken = "ih2pm2dr3k74"
+        val environment = AdjustConfig.ENVIRONMENT_SANDBOX
+        val config = createAdjustConfig(application, appToken, environment)
+        config.needsCost = true
+        setAttributionChangeListener(config)
+        Adjust.onCreate(config)
+    }
+
+    private fun createAdjustConfig(application: Application, appToken: String, environment: String): AdjustConfig {
+        return AdjustConfig(application, appToken, environment)
+    }
+
+    private fun setAttributionChangeListener(config: AdjustConfig) {
+        config.setOnAttributionChangedListener { attribution ->
+            handleAttributionChange(attribution)
+        }
+    }
+
+    private fun handleAttributionChange(attribution: AdjustAttribution) {
+        val emptyAdjustSmile = AppData.adjust_fif.isEmpty()
+        val networkNotEmpty = attribution.network.isNotEmpty()
+        val isNotOrganic = !attribution.network.contains("organic", true)
+
+        if (emptyAdjustSmile && networkNotEmpty && isNotOrganic) {
+            AppData.adjust_fif = attribution.network
+            Log.e("TAG","adjust --data=${attribution}")
+        }
+    }
+    fun getGid(context: Context) {
+        GlobalScope.launch(Dispatchers.IO) {
+            runCatching {
+                AppData.gidData = AdvertisingIdClient.getAdvertisingIdInfo(context).id ?: ""
+            }
+        }
+    }
+    private fun getReferrerData(context: Context) {
+        var installReferrer = ""
+        val referrer = AppData.local_ref
+        if (referrer.isNotBlank() && AppData.isInstall == "1") {
+            return
+        }
+//        installReferrer = "facebook"
+//        installReferrer = "utm_source=(not%20set)&utm_medium=(not%20set)"
+//        AppData.local_ref = installReferrer
+        runCatching {
+            val referrerClient = InstallReferrerClient.newBuilder(context).build()
+            referrerClient.startConnection(object : InstallReferrerStateListener {
+                override fun onInstallReferrerSetupFinished(p0: Int) {
+                    when (p0) {
+                        InstallReferrerClient.InstallReferrerResponse.OK -> {
+                            val installReferrer =
+                                referrerClient.installReferrer.installReferrer ?: ""
+                            AppData.local_ref = installReferrer
+                            referrerClient.installReferrer?.run {
+                                NetHelp.postInstallData(getAppContext(),this)
+                            }
+                        }
+                    }
+                    referrerClient.endConnection()
+                }
+
+                override fun onInstallReferrerServiceDisconnected() {
+                }
+            })
+        }.onFailure { e ->
+        }
+    }
 }

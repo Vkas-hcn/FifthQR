@@ -2,15 +2,38 @@ package com.yellow.scan.linear.mole.fifthqr.utils
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.yellow.scan.linear.mole.fifthqr.BuildConfig
 import com.yellow.scan.linear.mole.fifthqr.R
 import com.yellow.scan.linear.mole.fifthqr.base.App
+import com.yellow.scan.linear.mole.fifthqr.bean.QrAdBean
+import com.yellow.scan.linear.mole.fifthqr.bean.QrFlowBean
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Date
 
 object AppData {
+    var put_data_url = if (BuildConfig.DEBUG) {
+        "https://test-sarah.easyfastphoto.com/giddy/avian/beaten"
+    } else {
+        "https://sarah.easyfastphoto.com/parakeet/societe/oak"
+    }
     var pp_url = "https://www.baidu.com"
     var bitmapQr: Bitmap? = null
     var qr_crete_data = """
         Text,Url,Location,Email,Wi-Fi
     """.trimIndent()
+
+    val QR_OPEN = "op"
+    val QR_BACK_MAIN = "bckIV"
+    val QR_CLICK_SCAN = "scnIV"
+    val QR_CLICK_CREATE = "crtIV"
+
+    val online_qr_ad = "online_qr_ad"
+    val online_qr_config = "online_qr_config"
     private val sharedPreferences by lazy {
         App.getAppContext().getSharedPreferences(
             "fif_key",
@@ -37,6 +60,16 @@ object AppData {
             field = value
         }
         get() = sharedPreferences.getInt("list_pos", 0)
+
+    var list_color_pos = 4
+        set(value) {
+            sharedPreferences.edit().run {
+                putInt("list_color_pos", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getInt("list_color_pos", 4)
     var local_clock = ""
         set(value) {
             sharedPreferences.edit().run {
@@ -65,7 +98,94 @@ object AppData {
             field = value
         }
         get() = sharedPreferences.getString("gidData", "") ?: ""
-    //获取创建类型
+    var isInstall = "isInstall"
+        set(value) {
+            sharedPreferences.edit().run {
+                putString("isInstall", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getString("isInstall", "").toString()
+    var local_ref = ""
+        set(value) {
+            sharedPreferences.edit().run {
+                putString("local_ref", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getString("local_ref", "").toString()
+
+    var online_qr_ad_data = ""
+        set(value) {
+            sharedPreferences.edit().run {
+                putString("online_qr_ad_data", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getString("online_qr_ad_data", "") ?: ""
+
+    var online_qr_config_data = ""
+        set(value) {
+            sharedPreferences.edit().run {
+                putString("online_qr_config_data", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getString("online_qr_config_data", "") ?: ""
+    var current_qr_date = ""
+        set(value) {
+            sharedPreferences.edit().run {
+                putString("current_qr_date", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getString("current_qr_date", "").toString()
+
+
+    var clicks_qr_count = 0
+        set(value) {
+            sharedPreferences.edit().run {
+                putInt("clicks_qr_count", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getInt("clicks_qr_count", 0)
+
+    var show_qr_count = 0
+        set(value) {
+            sharedPreferences.edit().run {
+                putInt("show_qr_count", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getInt("show_qr_count", 0)
+
+    var ump_data_dialog = false
+        set(value) {
+            sharedPreferences.edit().run {
+                putBoolean("ump_data_dialog", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getBoolean("ump_data_dialog", false)
+    var adjust_fif = ""
+        set(value) {
+            sharedPreferences.edit().run {
+                putString("adjust_fif", value)
+                commit()
+            }
+            field = value
+        }
+        get() = sharedPreferences.getString("adjust_fif", "").toString()
+
     fun getQrCreteData(): List<String> {
         return qr_crete_data.split(",")
     }
@@ -130,8 +250,6 @@ object AppData {
         R.drawable.ic_cartoon_67,
         R.drawable.ic_cartoon_68,
     )
-
-
     val te_bg = listOf(
         R.drawable.bg_te01,
         R.drawable.bg_te02,
@@ -188,8 +306,6 @@ object AppData {
         R.drawable.ic_te23,
         R.drawable.ic_te24,
     )
-
-
     val pop_bg = listOf(
         R.drawable.bg_pop_1,
         R.drawable.bg_pop_2,
@@ -266,4 +382,158 @@ object AppData {
         }
     }
 
+
+    val local_qr_ad_data = """
+        {
+            "op": [
+                {
+                    "we_scan": "c",
+                    "id_scan": "ca-app-pub-3940256099942544/9257395921",
+                    "name_scan": "op",
+                    "type_scan": "Open"
+                }
+            ],
+            "crtIV": [
+                {
+                    "we_scan": "b",
+                    "id_scan": "ca-app-pub-3940256099942544/1033173712",
+                    "name_scan": "crtIV",
+                    "type_scan": "Interstitial"
+                }
+            ],
+            "scnIV": [
+                {
+                    "we_scan": "c",
+                    "id_scan": "ca-app-pub-3940256099942544/1033173712",
+                    "name_scan": "scnIV",
+                    "type_scan": "Interstitial"
+                }
+            ],
+            "bckIV": [
+                {
+                    "we_scan": "c",
+                    "id_scan": "ca-app-pub-3940256099942544/8691691433",
+                    "name_scan": "bckIV",
+                    "type_scan": "Interstitial"
+                }
+            ],
+            "clickNum": 2,
+            "showNum": 50
+        }
+    """.trimIndent()
+
+    val flowBeanData = """
+{
+    "pt": "2"
+}
+    """.trimIndent()
+    fun getAdJson(): QrAdBean {
+        val dataJson = online_qr_ad_data.let {
+            if (it.isEmpty()) {
+                local_qr_ad_data
+            } else {
+                decodeBase64(it)
+            }
+        }
+        return try {
+            Gson().fromJson(dataJson, object : TypeToken<QrAdBean>() {}.type)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Gson().fromJson(
+                local_qr_ad_data,
+                object : TypeToken<QrAdBean>() {}.type
+            )
+        }
+    }
+    fun getFlowJson(): QrFlowBean {
+        val dataJson = online_qr_config_data.let {
+            if (it.isEmpty()) {
+                flowBeanData
+            } else {
+                decodeBase64(it)
+            }
+        }
+        return try {
+            Gson().fromJson(dataJson, object : TypeToken<QrFlowBean>() {}.type)
+        } catch (e: Exception) {
+            Gson().fromJson(
+                flowBeanData,
+                object : TypeToken<QrFlowBean>() {}.type
+            )
+        }
+    }
+    fun decodeBase64(str: String): String {
+        return String(android.util.Base64.decode(str, android.util.Base64.DEFAULT))
+    }
+
+
+
+    fun recordNumberOfAdDisplaysGreen() {
+        var showCount = show_qr_count
+        showCount++
+        show_qr_count = showCount
+    }
+
+    fun recordNumberOfAdClickGreen() {
+        var clicksCount = clicks_qr_count
+        clicksCount++
+        clicks_qr_count = clicksCount
+    }
+
+    fun isAppGreenSameDayGreen() {
+        if (current_qr_date == "") {
+            current_qr_date = formatDateNow()
+        } else {
+            if (dateAfterDate(current_qr_date, formatDateNow())) {
+                current_qr_date = formatDateNow()
+                clicks_qr_count = 0
+                show_qr_count = 0
+            }
+        }
+    }
+
+    private fun formatDateNow(): String {
+        val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val date = Date()
+        return simpleDateFormat.format(date)
+    }
+
+    fun dateAfterDate(startTime: String?, endTime: String?): Boolean {
+        val format = SimpleDateFormat("yyyy-MM-dd")
+        try {
+            val startDate: Date = format.parse(startTime)
+            val endDate: Date = format.parse(endTime)
+            val start: Long = startDate.getTime()
+            val end: Long = endDate.getTime()
+            if (end > start) {
+                return true
+            }
+        } catch (e: ParseException) {
+            e.printStackTrace()
+            return false
+        }
+        return false
+    }
+    fun isThresholdReached(): Boolean {
+        return clicks_qr_count >= getAdJson().clickNum || show_qr_count >= getAdJson().showNum
+    }
+    fun AppCompatActivity.isVisible(): Boolean {
+        return lifecycle.currentState == Lifecycle.State.RESUMED
+    }
+    fun showAdBlacklist(): Boolean {
+        val blackData = local_clock != "drapery"
+        return when (getFlowJson().black_type_qr) {
+            "00" -> {
+                !blackData
+            }
+
+            "2" -> {
+                true
+            }
+
+            else -> {
+                true
+            }
+        }
+    }
 }

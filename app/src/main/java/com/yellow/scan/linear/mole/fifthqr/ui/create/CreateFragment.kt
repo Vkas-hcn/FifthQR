@@ -15,11 +15,15 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yellow.scan.linear.mole.fifthqr.R
+import com.yellow.scan.linear.mole.fifthqr.base.App
+import com.yellow.scan.linear.mole.fifthqr.base.QrAdLoad
 import com.yellow.scan.linear.mole.fifthqr.databinding.FragmentLayoutCreateBinding
 import com.yellow.scan.linear.mole.fifthqr.databinding.FragmentLayoutScanBinding
 import com.yellow.scan.linear.mole.fifthqr.ui.end.EndActivity
+import com.yellow.scan.linear.mole.fifthqr.ui.main.MainActivity
 import com.yellow.scan.linear.mole.fifthqr.ui.mid.MidActivity
 import com.yellow.scan.linear.mole.fifthqr.utils.AppData
+import com.yellow.scan.linear.mole.fifthqr.utils.NetHelp
 
 class CreateFragment : Fragment() {
     private lateinit var binding: FragmentLayoutCreateBinding
@@ -38,7 +42,8 @@ class CreateFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setEditListener()
-
+        QrAdLoad.loadOf(AppData.QR_BACK_MAIN)
+        NetHelp.postPotNet(App.getAppContext(), "scan2")
         adapter = CreteListAdapter()
         binding.rvCrete.adapter = adapter
         binding.rvCrete.layoutManager =
@@ -59,17 +64,32 @@ class CreateFragment : Fragment() {
         }
         binding.tvCreate.setOnClickListener {
             if (setCreteButton()) {
-                val intent = Intent(activity, MidActivity::class.java)
-                getQrTextData()
-                intent.putExtra("mid_qr", qrText)
-                startActivity(intent)
+                (activity as MainActivity).showCreteAdFun()
             } else {
                 Toast.makeText(activity, "Please fill in the information", Toast.LENGTH_SHORT)
                     .show()
             }
+            NetHelp.postPotNet(App.getAppContext(), "scan17","qr",getQrType())
         }
     }
 
+    fun jumToMidActivity() {
+        val intent = Intent(activity, MidActivity::class.java)
+        getQrTextData()
+        intent.putExtra("mid_qr", qrText)
+        startActivity(intent)
+    }
+    fun getQrType(): String {
+        return when(binding?.creteType!!){
+            1 -> "Text"
+            2 -> "URL"
+            3 -> "Location"
+            4 -> "Email"
+            5 -> "Wifi"
+            else -> "Text"
+
+        }
+    }
     private fun getQrTextData() {
         when (binding?.creteType!!) {
             1 -> {

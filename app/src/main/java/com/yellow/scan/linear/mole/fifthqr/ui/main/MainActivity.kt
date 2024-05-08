@@ -23,14 +23,26 @@ import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CodeUtils.analyzeBitma
 import android.content.Context
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.yellow.scan.linear.mole.fifthqr.base.App
+import com.yellow.scan.linear.mole.fifthqr.base.QrAdLoad
 import com.yellow.scan.linear.mole.fifthqr.ui.scan.ScanFragment
 import com.yellow.scan.linear.mole.fifthqr.utils.AppData
+import com.yellow.scan.linear.mole.fifthqr.utils.NetHelp
 import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CaptureFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 
 class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
     R.layout.activity_main, BaseViewModel::class.java
@@ -41,12 +53,19 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
     lateinit var fragmentMore: MoreFragment
     lateinit var imagePicker: ImagePicker
     lateinit var flashlightManager: FlashlightManager
+    private var loadJob: Job? = null
+    private var showCreteAd = MutableLiveData<Any>()
+    private var showScanAd = MutableLiveData<Any>()
+    private var showBackAd = MutableLiveData<Any>()
 
+    var result = ""
+    private var isClickType = 1 // 1: scan, 2: create, 3: more
     override fun intiView() {
         cameraPermissionManager = CameraPermissionManager(this)
         cameraPermissionManager.checkCameraPermission(this)
         imagePicker = ImagePicker(this)
         flashlightManager = FlashlightManager(this)
+
         binding.tvShare.setOnClickListener {
             shareApp(this)
         }
@@ -60,6 +79,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
         }
         binding.imgSetting.setOnClickListener {
             binding.drawerMain.open()
+            NetHelp.postPotNet(App.getAppContext(), "scan4")
         }
 
     }
@@ -78,33 +98,58 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
         fragmentMore = MoreFragment()
         supportFragmentManager.beginTransaction().replace(R.id.frag_main, fragmentScan).commit()
         binding.imgScan.setOnClickListener {
-            if (binding.haveLoad == true) {
-                return@setOnClickListener
+            lifecycleScope.launch {
+                if (binding.haveLoad == true) {
+                    return@launch
+                }
+                QrAdLoad.loadOf(AppData.QR_CLICK_SCAN)
+                if (!cameraPermissionManager.checkCameraPermission(this@MainActivity)) {
+                    return@launch
+                }
+                if (AppData.isThresholdReached() && QrAdLoad.resultOf(AppData.QR_BACK_MAIN) == "") {
+                    binding.haveLoad = true
+                    binding.tvLoading.text = "Loading..."
+                    delay(1000)
+                    binding.tvLoading.text = "Ad Loading..."
+                    binding.haveLoad = false
+                    toScanFragment()
+                    return@launch
+                }
+                showBackAdFun {
+                    toScanFragment()
+                }
+                isClickType = 1
             }
-            cameraPermissionManager.checkCameraPermission(this)
-            loadFragment(fragmentScan)
-            binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
-            binding.atvCreate.setTextColor(resources.getColor(R.color.dis_setele_color))
         }
         binding.atvCreate.setOnClickListener {
-            loadFragment(fragmentCrete)
-            binding.atvCreate.setTextColor(resources.getColor(R.color.setele_color))
-            binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
+            isClickType = 2
+            toCreteFragment()
         }
         binding.atvMore.setOnClickListener {
-            loadFragment(fragmentMore)
-            binding.atvCreate.setTextColor(resources.getColor(R.color.dis_setele_color))
-            binding.atvMore.setTextColor(resources.getColor(R.color.setele_color))
+            showBackAdFun {
+                toMoreFragment()
+            }
+            isClickType = 3
+        }
+        showScanFun {
+            jumToResultPage()
+        }
+        showCreteFun {
+            fragmentCrete.jumToMidActivity()
+        }
+        showBackFun {
+            if (isClickType == 1) {
+                toScanFragment()
+            }
+            if (isClickType == 3) {
+                toMoreFragment()
+            }
         }
     }
 
+
     private fun loadFragment(fragment: Fragment) {
         lifecycleScope.launch {
-            if (fragment is ScanFragment) {
-                binding.haveLoad = true
-                delay(1000)
-                binding.haveLoad = false
-            }
             supportFragmentManager.beginTransaction().replace(R.id.frag_main, fragment).commitNow()
         }
     }
@@ -115,17 +160,27 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
         binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
     }
 
+    private fun toScanFragment() {
+        loadFragment(fragmentScan)
+        binding.atvCreate.setTextColor(resources.getColor(R.color.dis_setele_color))
+        binding.atvMore.setTextColor(resources.getColor(R.color.dis_setele_color))
+    }
+
+    private fun toMoreFragment() {
+        loadFragment(fragmentMore)
+        binding.atvCreate.setTextColor(resources.getColor(R.color.dis_setele_color))
+        binding.atvMore.setTextColor(resources.getColor(R.color.setele_color))
+    }
+
     fun shareApp(context: Context) {
         val shareText = "https://play.google.com/store/apps/details?id=${context.packageName}"
-
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "text/plain"
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
-
         context.startActivity(Intent.createChooser(shareIntent, "Share via"))
     }
 
-    fun openAppInPlayStore(context: Context) {
+    private fun openAppInPlayStore(context: Context) {
         val packageName = context.packageName
         val uri = Uri.parse("market://details?id=$packageName")
         val intent = Intent(Intent.ACTION_VIEW, uri)
@@ -139,7 +194,121 @@ class MainActivity : BaseActivity<ActivityMainBinding, BaseViewModel>(
         }
     }
 
-    fun jumToResultPage(result: String) {
+
+    private fun startAdLoad(adType: String, nextFun: (data: Any) -> Unit, timeOutFun: () -> Unit) {
+        if (AppData.isThresholdReached() && QrAdLoad.resultOf(adType) == "") {
+            timeOutFun()
+            return
+        }
+        loadJob?.cancel()
+        loadJob = null
+        loadJob = lifecycleScope.launch(Dispatchers.Main) {
+
+            try {
+                withTimeout(5000L) {
+
+                    binding.haveLoad = true
+                    delay(1000)
+
+                    while (isActive) {
+                        QrAdLoad.resultOf(adType)?.let { res ->
+                            loadJob?.cancel()
+                            loadJob = null
+                            binding.haveLoad = false
+                            nextFun(res)
+                        }
+                        delay(500L)
+                    }
+                }
+            } catch (e: TimeoutCancellationException) {
+                loadJob?.cancel()
+                loadJob = null
+                binding.haveLoad = false
+                timeOutFun()
+            }
+        }
+    }
+
+
+    private fun showCreteFun(nextFun: () -> Unit) {
+        showCreteAd.observe(this) {
+            QrAdLoad.showFullScreenOf(
+                where = AppData.QR_CLICK_CREATE,
+                context = this,
+                res = it,
+                preload = true,
+                onShowCompleted = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        nextFun()
+                    }
+                }
+            )
+        }
+    }
+
+    private fun showScanFun(nextFun: () -> Unit) {
+        showScanAd.observe(this) {
+            QrAdLoad.showFullScreenOf(
+                where = AppData.QR_CLICK_SCAN,
+                context = this,
+                res = it,
+                preload = true,
+                onShowCompleted = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        nextFun()
+                    }
+                }
+            )
+        }
+    }
+
+    private fun showBackFun(nextFun: () -> Unit) {
+        showBackAd.observe(this) {
+            QrAdLoad.showFullScreenOf(
+                where = AppData.QR_BACK_MAIN,
+                context = this,
+                res = it,
+                preload = true,
+                onShowCompleted = {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        nextFun()
+                    }
+                }
+            )
+        }
+    }
+
+    private fun showBackAdFun(nextFun: () -> Unit) {
+        if (isClickType == 2) {
+            startAdLoad(AppData.QR_BACK_MAIN, {
+                showBackAd.value = it
+            }, {
+                nextFun()
+            })
+            NetHelp.postPotNet(App.getAppContext(), "scan16")
+        } else {
+            nextFun()
+        }
+    }
+
+    fun showCreteAdFun() {
+        startAdLoad(AppData.QR_CLICK_CREATE, {
+            showCreteAd.value = it
+        }, {
+            fragmentCrete.jumToMidActivity()
+        })
+    }
+
+    fun showScanAdFun() {
+        NetHelp.postPotNet(App.getAppContext(), "scan8")
+        startAdLoad(AppData.QR_CLICK_SCAN, {
+            showScanAd.value = it
+        }, {
+            jumToResultPage()
+        })
+    }
+
+    private fun jumToResultPage() {
         val intent = Intent(this, ActivityResult::class.java)
         val bundle = Bundle()
         bundle.putString("result_qr", result)
@@ -168,7 +337,6 @@ class ImagePicker(private val activity: AppCompatActivity) {
 
     private var imagePickerCallback: ((Uri?) -> Unit)? = null
 
-    // 启动图片选择器
     fun pickImage(callback: (Uri?) -> Unit) {
         App.whetherBackgroundSmild = false
         imagePickerCallback = callback
@@ -189,14 +357,15 @@ class ImagePicker(private val activity: AppCompatActivity) {
         try {
             val mBitmap = MediaStore.Images.Media.getBitmap(cr, selectedImageUri)
             analyzeBitmap(mBitmap, object : CodeUtils.AnalyzeCallback {
-                override fun onAnalyzeSuccess(mBitmap: Bitmap?, result: String?) {
-                    if (result.isNullOrEmpty()) {
+                override fun onAnalyzeSuccess(mBitmap: Bitmap?, resultData: String?) {
+                    if (resultData.isNullOrEmpty()) {
                         Toast.makeText(
                             activity, "Identification failed, please try again", Toast.LENGTH_SHORT
                         ).show()
                         return
                     }
-                    activity.jumToResultPage(result)
+                    activity.result = resultData
+                    activity.showScanAdFun()
                 }
 
                 override fun onAnalyzeFailed() {
@@ -210,6 +379,9 @@ class ImagePicker(private val activity: AppCompatActivity) {
             e.printStackTrace()
         }
     }
+
+    //show ad load
+
 
 }
 

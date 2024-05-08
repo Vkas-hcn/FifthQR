@@ -13,10 +13,12 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yellow.scan.linear.mole.fifthqr.R
+import com.yellow.scan.linear.mole.fifthqr.base.App
 import com.yellow.scan.linear.mole.fifthqr.databinding.FragmentLayoutMoreBinding
 import com.yellow.scan.linear.mole.fifthqr.databinding.FragmentLayoutScanBinding
 import com.yellow.scan.linear.mole.fifthqr.ui.mid.BackgroundListAdapter
 import com.yellow.scan.linear.mole.fifthqr.utils.AppData
+import com.yellow.scan.linear.mole.fifthqr.utils.NetHelp
 
 class MoreFragment : Fragment() {
     private lateinit var binding: FragmentLayoutMoreBinding
@@ -35,6 +37,7 @@ class MoreFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setMoreAdapter()
         clickFun()
+        NetHelp.postPotNet(App.getAppContext(), "scan3")
     }
 
     private fun clickFun() {
@@ -118,6 +121,7 @@ class MoreListAdapter : RecyclerView.Adapter<MoreListAdapter.ViewHolder>() {
         notifyItemChanged(oldPosition)
         notifyItemChanged(selectedItemPositionFun)
         listener?.onItemClick(position)
+        NetHelp.postPotNet(App.getAppContext(), "scan23", "qr",getListType())
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -131,4 +135,12 @@ class MoreListAdapter : RecyclerView.Adapter<MoreListAdapter.ViewHolder>() {
         return data.size
     }
 
+    fun getListType(): String {
+        return when (AppData.bg_type) {
+            1 -> "pop"
+            2 -> "te"
+            3 -> "cartoon"
+            else -> "pop"
+        }
+    }
 }

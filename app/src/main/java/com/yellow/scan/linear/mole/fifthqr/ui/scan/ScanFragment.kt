@@ -23,8 +23,10 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.yellow.scan.linear.mole.fifthqr.R
+import com.yellow.scan.linear.mole.fifthqr.base.App
 import com.yellow.scan.linear.mole.fifthqr.databinding.FragmentLayoutScanBinding
 import com.yellow.scan.linear.mole.fifthqr.ui.main.MainActivity
+import com.yellow.scan.linear.mole.fifthqr.utils.NetHelp
 import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CaptureFragment
 import com.yellow.scan.linear.mole.fifthqr.zxing.activity.CodeUtils
 
@@ -45,6 +47,7 @@ class ScanFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         clickFunction()
         setQrScan()
+        NetHelp.postPotNet(App.getAppContext(), "scan1")
     }
 
     override fun onResume() {
@@ -64,12 +67,14 @@ class ScanFragment : Fragment() {
                     (activity as MainActivity).imagePicker.setImageUri(activity = activity as MainActivity, selectedImageUri = it)
                 }
             }
+            NetHelp.postPotNet(App.getAppContext(), "scan9")
         }
         binding.imgFlash.setOnClickListener {
             (activity as MainActivity).flashlightManager.apply {
                 val isFlashlightOn = toggleFlashlight()
                 updateFlashlightIcon(isFlashlightOn)
             }
+            NetHelp.postPotNet(App.getAppContext(), "scan10")
         }
     }
 
@@ -91,7 +96,8 @@ class ScanFragment : Fragment() {
                     ).show()
                     return
                 }
-                (activity as MainActivity).jumToResultPage(result)
+                (activity as MainActivity).result = result
+                (activity as MainActivity).showScanAdFun()
             }
 
             override fun onAnalyzeFailed() {

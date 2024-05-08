@@ -20,7 +20,7 @@ class CameraPermissionManager(private val context: Context) {
         private const val CAMERA_PERMISSION_REQUEST_CODE = 1001
     }
 
-    fun checkCameraPermission(activity: Activity) {
+    fun checkCameraPermission(activity: Activity):Boolean {
         if (ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.CAMERA
@@ -32,10 +32,13 @@ class CameraPermissionManager(private val context: Context) {
                 )
             ) {
                 showPermissionRationaleDialog(activity)
+                return false
             } else {
                 requestCameraPermission(activity)
+                return true
             }
         }
+        return true
     }
 
     private fun showPermissionRationaleDialog(activity: Activity) {

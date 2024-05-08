@@ -36,9 +36,11 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.yellow.scan.linear.mole.fifthqr.utils.NetHelp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -57,7 +59,7 @@ class MidActivity : BaseActivity<ActivityMidBinding, BaseViewModel>(
     override fun intiView() {
         endQr = intent.getStringExtra("mid_qr") ?: ""
         binding.imgBack.setOnClickListener {
-            finish()
+            backFun()
         }
         binding.tvBackground.setOnClickListener {
             binding.haveColor = false
@@ -71,8 +73,17 @@ class MidActivity : BaseActivity<ActivityMidBinding, BaseViewModel>(
             } else {
                 requestWritePermission()
             }
-
         }
+        onBackPressedDispatcher.addCallback(this) {
+            backFun()
+        }
+        NetHelp.postPotNet(App.getAppContext(), "scan6")
+    }
+
+
+    private fun backFun() {
+        NetHelp.postPotNet(App.getAppContext(), "scan18")
+        finish()
     }
 
     override fun initData() {
@@ -166,7 +177,7 @@ class MidActivity : BaseActivity<ActivityMidBinding, BaseViewModel>(
         startActivity(intent)
     }
 
-    fun creteBitMap() {
+    private fun creteBitMap() {
         val viewData = binding.cardQrcode
         viewModel.convertCardViewToBitmap(viewData) { bitmap ->
             AppData.bitmapQr = bitmap
@@ -174,11 +185,35 @@ class MidActivity : BaseActivity<ActivityMidBinding, BaseViewModel>(
 
     }
 
-    fun jumpToNext() {
+    private fun jumpToNext() {
+        NetHelp.postPotNet(
+            App.getAppContext(),
+            "scan20",
+            "background",
+            getBackgroundDef(),
+            "color",
+            getColorDef()
+        )
         val intent = Intent(this, EndActivity::class.java)
         intent.putExtra("end_qr", endQr)
         startActivity(intent)
         finish()
+    }
+
+    fun getBackgroundDef(): String {
+        return if (AppData.list_pos == 0) {
+            "def"
+        } else {
+            "new"
+        }
+    }
+
+    fun getColorDef(): String {
+        return if (AppData.list_color_pos == 4) {
+            "def"
+        } else {
+            "new"
+        }
     }
 
     private fun downloadAndSaveImage() {
@@ -191,7 +226,13 @@ class MidActivity : BaseActivity<ActivityMidBinding, BaseViewModel>(
                 jumpToNext()
             }
             val savedUri =
-                AppData.bitmapQr?.let { saveImageToGallery(it, "qrcode_${System.currentTimeMillis()}", "") }
+                AppData.bitmapQr?.let {
+                    saveImageToGallery(
+                        it,
+                        "qrcode_${System.currentTimeMillis()}",
+                        ""
+                    )
+                }
             if (savedUri != null) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
@@ -273,6 +314,7 @@ class BackgroundListAdapter : RecyclerView.Adapter<BackgroundListAdapter.ViewHol
         notifyItemChanged(oldPosition)
         notifyItemChanged(selectedItemPositionFun)
         listener?.onItemClick(position)
+        AppData.list_pos = position
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -290,7 +332,7 @@ class BackgroundListAdapter : RecyclerView.Adapter<BackgroundListAdapter.ViewHol
 
 class ColorListAdapter : RecyclerView.Adapter<ColorListAdapter.ViewHolder>() {
     private var data = AppData.colorsArray
-    var selectedItemPositionFun: Int = 4
+    var selectedItemPositionFun: Int = AppData.list_color_pos
 
     interface OnItemClickListener {
         fun onItemClick(position: Int)
@@ -324,6 +366,7 @@ class ColorListAdapter : RecyclerView.Adapter<ColorListAdapter.ViewHolder>() {
         notifyItemChanged(oldPosition)
         notifyItemChanged(selectedItemPositionFun)
         listener?.onItemClick(position)
+        AppData.list_color_pos = position
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

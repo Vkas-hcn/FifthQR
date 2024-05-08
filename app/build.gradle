@@ -55,7 +55,8 @@ android {
 }
 
 dependencies {
-
+    //gson
+    implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.google.zxing:core:3.5.3'
     implementation 'androidx.core:core-ktx:1.13.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -66,4 +67,16 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'com.github.megatronking.stringfog:xor:4.0.1'
+
+    implementation platform('com.google.firebase:firebase-bom:32.1.1')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-config-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.android.gms:play-services-ads:21.4.0'
+
+    implementation 'com.adjust.sdk:adjust-android:4.33.5'
+    implementation("com.google.android.ump:user-messaging-platform:2.2.0")
+    implementation 'com.facebook.android:facebook-android-sdk:12.3.0'
+    implementation "com.android.installreferrer:installreferrer:2.2"
+
 }
