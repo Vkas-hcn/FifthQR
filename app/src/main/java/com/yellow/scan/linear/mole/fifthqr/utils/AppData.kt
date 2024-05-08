@@ -427,8 +427,8 @@ object AppData {
                     "type_scan": "Interstitial"
                 }
             ],
-            "clickNum": 2,
-            "showNum": 20
+            "cc": 2,
+            "sh": 20
         }
     """.trimIndent()
 
@@ -525,7 +525,7 @@ object AppData {
         return false
     }
     fun isThresholdReached(): Boolean {
-        return clicks_qr_count >= getAdJson().clickNum || show_qr_count >= getAdJson().showNum
+        return clicks_qr_count >= getAdJson().cc || show_qr_count >= getAdJson().sh
     }
     fun AppCompatActivity.isVisible(): Boolean {
         return lifecycle.currentState == Lifecycle.State.RESUMED

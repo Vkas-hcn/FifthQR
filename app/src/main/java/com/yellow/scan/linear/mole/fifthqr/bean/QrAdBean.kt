@@ -15,8 +15,8 @@ data class QrAdBean(
     @SerializedName("scnIV")
     val scan_qr: MutableList<AdInformation> = ArrayList(),
 
-    val clickNum:Int,
-    val showNum:Int,
+    val cc:Int,
+    val sh:Int,
 )
 
 @Keep
