@@ -32,8 +32,8 @@ object AppData {
     val QR_CLICK_SCAN = "scnIV"
     val QR_CLICK_CREATE = "crtIV"
 
-    val online_qr_ad = "online_qr_ad"
-    val online_qr_config = "online_qr_config"
+    val online_qr_ad = "easy"
+    val online_qr_config = "pt"
     private val sharedPreferences by lazy {
         App.getAppContext().getSharedPreferences(
             "fif_key",
